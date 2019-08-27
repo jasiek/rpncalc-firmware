@@ -10,6 +10,14 @@ pub struct UI {
 const WINDOW_HEIGHT: i32 = 20;
 const WINDOW_LENGTH: i32 = 20;
 
+const KEY_0: i32 = 48;
+const KEY_9: i32 = 58;
+const KEY_PLUS: i32 = 43;
+const KEY_MINUS: i32 = 45;
+const KEY_MULTIPLY: i32 = 42;
+const KEY_DIVIDE: i32 = 47;
+const KEY_ENTER: i32 = 10;
+
 impl UI {
     pub fn new() -> Self {
         n::initscr();
@@ -46,14 +54,23 @@ impl UI {
     pub fn run(&mut self) {
         let c = n::getch();
         match c {
-            48..=58 => {
+            KEY_0..=KEY_9 => {
                 let d: u8 = (c - 48).try_into().unwrap();
                 self.calc.digit(d);
             }
-            43 => {
+            KEY_PLUS => {
                 self.calc.add();
             }
-            10 => {
+            KEY_MINUS => {
+                self.calc.sub();
+            }
+            KEY_MULTIPLY => {
+                self.calc.mul();
+            }
+            KEY_DIVIDE => {
+                self.calc.div();
+            }
+            KEY_ENTER => {
                 self.calc.enter();
             }
             _ => {}

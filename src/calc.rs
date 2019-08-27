@@ -28,10 +28,26 @@ impl Calculator {
     }
 
     pub fn add(&mut self) {
+        self.apply(|a, b| a + b);
+    }
+
+    pub fn sub(&mut self) {
+        self.apply(|a, b| b - a);
+    }
+
+    pub fn mul(&mut self) {
+        self.apply(|a, b| a * b);
+    }
+
+    pub fn div(&mut self) {
+        self.apply(|a, b| b / a);
+    }
+
+    fn apply(&mut self, f: fn(i32, i32) -> i32) {
         if self.stack.len() >= 2 {
             let a = self.stack.pop().unwrap();
             let b = self.stack.pop().unwrap();
-            self.stack.push(a + b);
+            self.stack.push(f(a, b));
         }
     }
 }
