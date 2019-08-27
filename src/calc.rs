@@ -8,11 +8,24 @@ impl Calculator {
         Self { stack: v }
     }
 
-    pub fn stack(&self) -> Vec<i32> {
-        self.stack.clone()
+    pub fn stack(&self) -> &Vec<i32> {
+        &self.stack
     }
 
-    pub fn digit(&mut self, d: u8) {}
+    pub fn digit(&mut self, d: u8) {
+        let top_n = self.stack.pop().unwrap();
+        let mut top_s = top_n.to_string();
+        let arg = d.to_string();
+        top_s.push_str(&arg);
+        let top_n = top_s.parse().unwrap();
+        self.stack.push(top_n);
+    }
+
+    pub fn enter(&mut self) {
+        if 0i32 != *self.stack.last().unwrap() {
+            self.stack.push(0);
+        }
+    }
 
     pub fn add(&mut self) {
         if self.stack.len() >= 2 {
