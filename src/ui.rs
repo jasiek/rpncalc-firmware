@@ -1,10 +1,10 @@
-use std::convert::TryInto;
-use ncurses as n;
 use crate::calc::Calculator;
+use ncurses as n;
+use std::convert::TryInto;
 
 pub struct UI {
     stack_win: n::WINDOW,
-    calc: Calculator
+    calc: Calculator,
 }
 
 const WINDOW_HEIGHT: i32 = 20;
@@ -17,7 +17,7 @@ impl UI {
         n::noecho();
         Self {
             stack_win: n::newwin(WINDOW_HEIGHT, WINDOW_LENGTH, 0, 0),
-            calc: Calculator::new()
+            calc: Calculator::new(),
         }
     }
 
@@ -34,11 +34,11 @@ impl UI {
             n::mvwprintw(self.stack_win, y, x, &stack[stack_idx].to_string());
             stack_idx += 1;
         }
-        
+
         n::refresh();
         n::wrefresh(self.stack_win);
     }
-    
+
     pub fn run(&mut self) {
         self.draw();
         let c = n::getch();
@@ -47,8 +47,7 @@ impl UI {
                 let d: u8 = (c - 48).try_into().unwrap();
                 self.calc.digit(d);
             }
-            _ => {
-            }
+            _ => {}
         }
     }
 }
