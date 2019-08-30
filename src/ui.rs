@@ -4,7 +4,7 @@ use std::convert::TryInto;
 
 pub struct UI {
     stack_win: n::WINDOW,
-    calc: Calculator,
+    calc: Calculator<i32>,
 }
 
 const WINDOW_HEIGHT: i32 = 20;

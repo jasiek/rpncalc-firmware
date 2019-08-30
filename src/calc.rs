@@ -1,29 +1,37 @@
-pub struct Calculator {
-    stack: Vec<i32>,
+use num::PrimInt;
+use std::string::ToString;
+use std::str::FromStr;
+    
+pub struct Calculator<T: PrimInt + ToString + FromStr> {
+    stack: Vec<T>,
 }
 
-impl Calculator {
+impl<T: PrimInt + ToString + FromStr> Calculator<T> {
     pub fn new() -> Self {
-        let v: Vec<i32> = vec![0];
+        let v: Vec<T> = vec![T::zero()];
         Self { stack: v }
     }
 
-    pub fn stack(&self) -> &Vec<i32> {
+    pub fn stack(&self) -> &Vec<T> {
         &self.stack
     }
 
     pub fn digit(&mut self, d: u8) {
-        let top_n = self.stack.pop().unwrap();
-        let mut top_s = top_n.to_string();
-        let arg = d.to_string();
-        top_s.push_str(&arg);
-        let top_n = top_s.parse().unwrap();
-        self.stack.push(top_n);
+        // TODO: this needs cleanup
+        if let Some(top_n) = self.stack.pop() {
+            let mut top_s = top_n.to_string();
+            let arg = d.to_string();
+            top_s.push_str(&arg);
+            if let Ok(top_n) = top_s.parse() {
+                self.stack.push(top_n);
+            }
+        }
     }
 
     pub fn enter(&mut self) {
-        if 0i32 != *self.stack.last().unwrap() {
-            self.stack.push(0);
+        let zero = T::zero();
+        if  zero != *self.stack.last().unwrap() {
+            self.stack.push(zero);
         }
     }
 
@@ -43,7 +51,7 @@ impl Calculator {
         self.apply(|a, b| b / a);
     }
 
-    fn apply(&mut self, f: fn(i32, i32) -> i32) {
+    fn apply(&mut self, f: fn(T, T) -> T) {
         if self.stack.len() >= 2 {
             let a = self.stack.pop().unwrap();
             let b = self.stack.pop().unwrap();

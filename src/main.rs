@@ -1,3 +1,5 @@
+extern crate num;
+
 mod calc;
 mod ui;
 
