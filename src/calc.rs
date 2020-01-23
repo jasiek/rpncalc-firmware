@@ -37,6 +37,10 @@ impl<T: Float + ToString + FromStr> Calculator<T> {
         self.stack.pop();
     }
 
+    pub fn peek(&self) -> T {
+        *self.stack.last().unwrap()
+    }
+
     pub fn swap(&mut self) {
         if self.stack.len() >= 2 {
             let a = self.stack.pop().unwrap();

@@ -19,7 +19,14 @@ const WINDOW_LENGTH: i32 = 40;
 const KEY_DOT: i32 = 46;
 const KEY_0: i32 = 48;
 const KEY_1: i32 = 49;
-const KEY_9: i32 = 58;
+const KEY_2: i32 = 50;
+const KEY_3: i32 = 51;
+const KEY_4: i32 = 52;
+const KEY_5: i32 = 53;
+const KEY_6: i32 = 54;
+const KEY_7: i32 = 55;
+const KEY_8: i32 = 56;
+const KEY_9: i32 = 57;
 const KEY_C: i32 = 99;
 const KEY_D: i32 = 100;
 const KEY_E: i32 = 101;
@@ -54,7 +61,7 @@ impl<'a, T: Float + ToString + FromStr> UI<'a, T> {
             stack_win: n::newwin(WINDOW_HEIGHT, WINDOW_LENGTH, 0, 0),
             help_win: n::newwin(WINDOW_HEIGHT, WINDOW_LENGTH, 0, WINDOW_LENGTH + 1),
             calc: calc,
-            current_number: String::new()
+            current_number: String::new(),
         };
         ui.draw();
         ui
@@ -108,7 +115,9 @@ impl<'a, T: Float + ToString + FromStr> UI<'a, T> {
                     self.current_number.push('.');
                 }
             }
-            _ => { panic!("unmatched"); }
+            _ => {
+                panic!("unmatched");
+            }
         }
         if let Ok(number) = self.current_number.parse() {
             self.calc.replace(number);
@@ -117,69 +126,102 @@ impl<'a, T: Float + ToString + FromStr> UI<'a, T> {
 
     pub fn run(&mut self) {
         loop {
-            let c = n::getch();
-            match c {
-                KEY_Q => {
-                    return;
-                }
-                KEY_DOT => {
-                    self.compose(c);
-                }
-                KEY_0..=KEY_9 => {
-                    self.compose(c);
-                }
-                KEY_C => {
-                    self.calc.clear();
-                }
-                KEY_D => {
-                    self.calc.drop();
-                }
-                KEY_E => {
-                    self.calc.roll();
-                }
-                KEY_R => {
-                    self.calc.reciprocal();
-                }
-                KEY_S => {
-                    self.calc.sqrt();
-                }
-                KEY_W => {
-                    self.calc.swap();
-                }
-                KEY_PLUS => {
-                    self.calc.add();
-                }
-                KEY_MINUS => {
-                    self.calc.sub();
-                }
-                KEY_MULTIPLY => {
-                    self.calc.mul();
-                }
-                KEY_DIVIDE => {
-                    self.calc.div();
-                }
-                KEY_ENTER => {
-                    self.calc.enter();
-                }
-                KEY_CARET => {
-                    self.calc.pow();
-                }
-                _ => {}
-            }
-
-            // Cleanup after an operation the stack
-            match c {
-                KEY_DOT => {},
-                KEY_0..=KEY_9 => {}
-                _ => { self.current_number.clear(); }
-            }
-            self.draw();
+            self.feed(n::getch());
         }
+    }
+
+    pub fn feed_test_helper(&mut self, chars: Vec<i32>) {
+        for c in chars {
+            self.feed(c);
+        }
+    }
+
+    pub fn feed(&mut self, c: i32) {
+        match c {
+            KEY_Q => {
+                return;
+            }
+            KEY_DOT => {
+                self.compose(c);
+            }
+            KEY_0..=KEY_9 => {
+                self.compose(c);
+            }
+            KEY_C => {
+                self.calc.clear();
+            }
+            KEY_D => {
+                self.calc.drop();
+            }
+            KEY_E => {
+                self.calc.roll();
+            }
+            KEY_R => {
+                self.calc.reciprocal();
+            }
+            KEY_S => {
+                self.calc.sqrt();
+            }
+            KEY_W => {
+                self.calc.swap();
+            }
+            KEY_PLUS => {
+                self.calc.add();
+            }
+            KEY_MINUS => {
+                self.calc.sub();
+            }
+            KEY_MULTIPLY => {
+                self.calc.mul();
+            }
+            KEY_DIVIDE => {
+                self.calc.div();
+            }
+            KEY_ENTER => {
+                self.calc.enter();
+            }
+            KEY_CARET => {
+                self.calc.pow();
+            }
+            _ => {}
+        }
+
+        // Cleanup after an operation the stack
+        match c {
+            KEY_DOT => {}
+            KEY_0..=KEY_9 => {}
+            _ => {
+                self.current_number.clear();
+            }
+        }
+        self.draw();
     }
 }
 
 impl<T: Float + ToString + FromStr> Drop for UI<'_, T> {
     fn drop(&mut self) {
         n::endwin();
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn enter_number() {
+        let mut c = Calculator::<f64>::new();
+        let mut u = UI::new(&mut c);
+        u.feed_test_helper(
+            [
+                KEY_9, KEY_8, KEY_7, KEY_6, KEY_DOT, KEY_5, KEY_4, KEY_3, KEY_2, KEY_0, KEY_1,
+            ]
+            .to_vec(),
+        );
+        assert_eq!(u.current_number, "9876.543201");
+        assert_eq!(u.calc.peek(), 9876.543201);
+        u.feed(KEY_ENTER);
+        assert_eq!(u.current_number, "");
+        assert_eq!(u.calc.peek(), 0.0);
     }
 }
