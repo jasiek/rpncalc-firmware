@@ -16,23 +16,16 @@ impl<T: Float + ToString + FromStr> Calculator<T> {
         &self.stack
     }
 
-    pub fn digit(&mut self, d: u8) {
-        // TODO: this needs cleanup
-        if let Some(top_n) = self.stack.pop() {
-            let mut top_s = top_n.to_string();
-            let arg = d.to_string();
-            top_s.push_str(&arg);
-            if let Ok(top_n) = top_s.parse() {
-                self.stack.push(top_n);
-            }
-        }
-    }
-
     pub fn enter(&mut self) {
         let zero = T::zero();
         if zero != *self.stack.last().unwrap() {
             self.stack.push(zero);
         }
+    }
+
+    pub fn replace(&mut self, number: T) {
+        self.stack.pop();
+        self.stack.push(number);
     }
 
     pub fn clear(&mut self) {

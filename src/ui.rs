@@ -1,6 +1,7 @@
 use crate::calc::Calculator;
 use ncurses as n;
 use num::Float;
+use std::char;
 use std::convert::TryInto;
 use std::str::FromStr;
 use std::string::ToString;
@@ -9,12 +10,15 @@ pub struct UI<'a, T: Float + ToString + FromStr> {
     stack_win: n::WINDOW,
     help_win: n::WINDOW,
     calc: &'a mut Calculator<T>,
+    current_number: String,
 }
 
 const WINDOW_HEIGHT: i32 = 20;
 const WINDOW_LENGTH: i32 = 40;
 
+const KEY_DOT: i32 = 46;
 const KEY_0: i32 = 48;
+const KEY_1: i32 = 49;
 const KEY_9: i32 = 58;
 const KEY_C: i32 = 99;
 const KEY_D: i32 = 100;
@@ -50,6 +54,7 @@ impl<'a, T: Float + ToString + FromStr> UI<'a, T> {
             stack_win: n::newwin(WINDOW_HEIGHT, WINDOW_LENGTH, 0, 0),
             help_win: n::newwin(WINDOW_HEIGHT, WINDOW_LENGTH, 0, WINDOW_LENGTH + 1),
             calc: calc,
+            current_number: String::new()
         };
         ui.draw();
         ui
@@ -64,15 +69,16 @@ impl<'a, T: Float + ToString + FromStr> UI<'a, T> {
         n::box_(self.help_win, 0, 0);
 
         let len32: i32 = stack.len().try_into().unwrap();
-        let miny: i32 = WINDOW_HEIGHT - len32 - 1;
+        let miny: i32 = WINDOW_HEIGHT - len32 - 2;
 
         let mut stack_idx = 0;
         n::mvwprintw(self.stack_win, 0, 1, "Stack");
-        for y in miny..(WINDOW_HEIGHT - 1) {
+        for y in miny..(WINDOW_HEIGHT - 2) {
             // TODO: right-justify formatting here
             n::mvwprintw(self.stack_win, y, 1, &stack[stack_idx].to_string());
             stack_idx += 1;
         }
+        n::mvwprintw(self.stack_win, WINDOW_HEIGHT - 2, 1, &self.current_number);
 
         // draw help
         let mut help_idx = 1;
@@ -86,13 +92,41 @@ impl<'a, T: Float + ToString + FromStr> UI<'a, T> {
         n::wrefresh(self.help_win);
     }
 
+    pub fn compose(&mut self, c: i32) {
+        match c {
+            KEY_0 => {
+                if self.current_number.len() > 0 {
+                    self.current_number.push('0');
+                }
+            }
+            KEY_1..=KEY_9 => {
+                let d = (c - 48).try_into().unwrap();
+                self.current_number.push(char::from_digit(d, 10).unwrap());
+            }
+            KEY_DOT => {
+                if !self.current_number.contains(".") {
+                    self.current_number.push('.');
+                }
+            }
+            _ => { panic!("unmatched"); }
+        }
+        if let Ok(number) = self.current_number.parse() {
+            self.calc.replace(number);
+        }
+    }
+
     pub fn run(&mut self) {
         loop {
             let c = n::getch();
             match c {
+                KEY_Q => {
+                    return;
+                }
+                KEY_DOT => {
+                    self.compose(c);
+                }
                 KEY_0..=KEY_9 => {
-                    let d: u8 = (c - 48).try_into().unwrap();
-                    self.calc.digit(d);
+                    self.compose(c);
                 }
                 KEY_C => {
                     self.calc.clear();
@@ -102,9 +136,6 @@ impl<'a, T: Float + ToString + FromStr> UI<'a, T> {
                 }
                 KEY_E => {
                     self.calc.roll();
-                }
-                KEY_Q => {
-                    return;
                 }
                 KEY_R => {
                     self.calc.reciprocal();
@@ -134,6 +165,13 @@ impl<'a, T: Float + ToString + FromStr> UI<'a, T> {
                     self.calc.pow();
                 }
                 _ => {}
+            }
+
+            // Cleanup after an operation the stack
+            match c {
+                KEY_DOT => {},
+                KEY_0..=KEY_9 => {}
+                _ => { self.current_number.clear(); }
             }
             self.draw();
         }
