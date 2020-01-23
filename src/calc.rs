@@ -1,12 +1,12 @@
-use num::PrimInt;
+use num::Float;
 use std::string::ToString;
 use std::str::FromStr;
     
-pub struct Calculator<T: PrimInt + ToString + FromStr> {
+pub struct Calculator<T: Float + ToString + FromStr> {
     stack: Vec<T>,
 }
 
-impl<T: PrimInt + ToString + FromStr> Calculator<T> {
+impl<T: Float + ToString + FromStr> Calculator<T> {
     pub fn new() -> Self {
         let v: Vec<T> = vec![T::zero()];
         Self { stack: v }
@@ -35,23 +35,46 @@ impl<T: PrimInt + ToString + FromStr> Calculator<T> {
         }
     }
 
+    // 2-argument functions
+
     pub fn add(&mut self) {
-        self.apply(|a, b| a + b);
+        self.apply2(|a, b| a + b);
     }
 
     pub fn sub(&mut self) {
-        self.apply(|a, b| b - a);
+        self.apply2(|a, b| b - a);
     }
 
     pub fn mul(&mut self) {
-        self.apply(|a, b| a * b);
+        self.apply2(|a, b| a * b);
     }
 
     pub fn div(&mut self) {
-        self.apply(|a, b| b / a);
+        self.apply2(|a, b| b / a);
     }
 
-    fn apply(&mut self, f: fn(T, T) -> T) {
+    // 1-argument functions
+
+    pub fn sqrt(&mut self) {
+        self.apply1(|a| a.sqrt());
+    }
+
+    pub fn reciprocal(&mut self) {
+        self.apply1(|a| a.recip());
+    }
+
+    pub fn pow(&mut self) {
+        self.apply2(|a, b| b.powf(a));
+    }
+
+    fn apply1(&mut self, f: fn(T) -> T) {
+        if self.stack.len() >= 1 {
+            let a = self.stack.pop().unwrap();
+            self.stack.push(f(a));
+        }
+    }
+
+    fn apply2(&mut self, f: fn(T, T) -> T) {
         if self.stack.len() >= 2 {
             let a = self.stack.pop().unwrap();
             let b = self.stack.pop().unwrap();

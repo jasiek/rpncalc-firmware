@@ -4,7 +4,7 @@ use std::convert::TryInto;
 
 pub struct UI {
     stack_win: n::WINDOW,
-    calc: Calculator<i32>,
+    calc: Calculator<f32>,
 }
 
 const WINDOW_HEIGHT: i32 = 20;
@@ -12,11 +12,14 @@ const WINDOW_LENGTH: i32 = 20;
 
 const KEY_0: i32 = 48;
 const KEY_9: i32 = 58;
+const KEY_R: i32 = 114;
+const KEY_S: i32 = 115;
 const KEY_PLUS: i32 = 43;
 const KEY_MINUS: i32 = 45;
 const KEY_MULTIPLY: i32 = 42;
 const KEY_DIVIDE: i32 = 47;
 const KEY_ENTER: i32 = 10;
+const KEY_CARET: i32 = 94;
 
 impl UI {
     pub fn new() -> Self {
@@ -58,6 +61,12 @@ impl UI {
                 let d: u8 = (c - 48).try_into().unwrap();
                 self.calc.digit(d);
             }
+            KEY_R => {
+                self.calc.reciprocal();
+            }
+            KEY_S => {
+                self.calc.sqrt();
+            }
             KEY_PLUS => {
                 self.calc.add();
             }
@@ -72,6 +81,9 @@ impl UI {
             }
             KEY_ENTER => {
                 self.calc.enter();
+            }
+            KEY_CARET => {
+                self.calc.pow();
             }
             _ => {}
         }
