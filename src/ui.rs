@@ -13,9 +13,13 @@ const WINDOW_LENGTH: i32 = 40;
 
 const KEY_0: i32 = 48;
 const KEY_9: i32 = 58;
+const KEY_C: i32 = 99;
+const KEY_D: i32 = 100;
+const KEY_E: i32 = 101;
 const KEY_Q: i32 = 113;
 const KEY_R: i32 = 114;
 const KEY_S: i32 = 115;
+const KEY_W: i32 = 119;
 const KEY_PLUS: i32 = 43;
 const KEY_MINUS: i32 = 45;
 const KEY_MULTIPLY: i32 = 42;
@@ -27,6 +31,8 @@ const HELP: &str = "0-9 - digits
 r - 1/x
 s - square root
 ^ - power
+d - drop
+c - clear
 
 q - quit";
 
@@ -83,6 +89,15 @@ impl UI {
                     let d: u8 = (c - 48).try_into().unwrap();
                     self.calc.digit(d);
                 }
+                KEY_C => {
+                    self.calc.clear();
+                }
+                KEY_D => {
+                    self.calc.drop();
+                }
+                KEY_E => {
+                    self.calc.roll();
+                }
                 KEY_Q => {
                     return;
                 }
@@ -91,6 +106,9 @@ impl UI {
                 }
                 KEY_S => {
                     self.calc.sqrt();
+                }
+                KEY_W => {
+                    self.calc.swap();
                 }
                 KEY_PLUS => {
                     self.calc.add();

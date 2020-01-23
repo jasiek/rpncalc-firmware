@@ -35,6 +35,28 @@ impl<T: Float + ToString + FromStr> Calculator<T> {
         }
     }
 
+    pub fn clear(&mut self) {
+        self.stack.clear();
+        self.enter();
+    }
+
+    pub fn drop(&mut self) {
+        self.stack.pop();
+    }
+
+    pub fn swap(&mut self) {
+        if self.stack.len() >= 2 {
+            let a = self.stack.pop().unwrap();
+            let b = self.stack.pop().unwrap();
+            self.stack.push(a);
+            self.stack.push(b);
+        }
+    }
+
+    pub fn roll(&mut self) {
+        self.stack.rotate_right(1);
+    }
+
     // 2-argument functions
 
     pub fn add(&mut self) {
