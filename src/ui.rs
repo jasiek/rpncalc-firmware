@@ -36,6 +36,8 @@ s - square root
 ^ - power
 d - drop
 c - clear
+e - roll
+w - swap
 
 q - quit";
 
