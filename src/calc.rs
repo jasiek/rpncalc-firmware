@@ -1,7 +1,7 @@
 use num::Float;
-use std::string::ToString;
 use std::str::FromStr;
-    
+use std::string::ToString;
+
 pub struct Calculator<T: Float + ToString + FromStr> {
     stack: Vec<T>,
 }
@@ -30,7 +30,7 @@ impl<T: Float + ToString + FromStr> Calculator<T> {
 
     pub fn enter(&mut self) {
         let zero = T::zero();
-        if  zero != *self.stack.last().unwrap() {
+        if zero != *self.stack.last().unwrap() {
             self.stack.push(zero);
         }
     }

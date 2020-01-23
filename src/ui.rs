@@ -1,11 +1,14 @@
 use crate::calc::Calculator;
 use ncurses as n;
+use num::Float;
 use std::convert::TryInto;
+use std::str::FromStr;
+use std::string::ToString;
 
-pub struct UI {
+pub struct UI<'a, T: Float + ToString + FromStr> {
     stack_win: n::WINDOW,
     help_win: n::WINDOW,
-    calc: Calculator<f32>,
+    calc: &'a mut Calculator<T>,
 }
 
 const WINDOW_HEIGHT: i32 = 20;
@@ -36,15 +39,15 @@ c - clear
 
 q - quit";
 
-impl UI {
-    pub fn new() -> Self {
+impl<'a, T: Float + ToString + FromStr> UI<'a, T> {
+    pub fn new(calc: &'a mut Calculator<T>) -> Self {
         n::initscr();
         n::cbreak();
         n::noecho();
         let ui = Self {
             stack_win: n::newwin(WINDOW_HEIGHT, WINDOW_LENGTH, 0, 0),
-            help_win: n::newwin(WINDOW_HEIGHT, WINDOW_LENGTH, 0, WINDOW_LENGTH+1),
-            calc: Calculator::new(),
+            help_win: n::newwin(WINDOW_HEIGHT, WINDOW_LENGTH, 0, WINDOW_LENGTH + 1),
+            calc: calc,
         };
         ui.draw();
         ui
@@ -135,7 +138,7 @@ impl UI {
     }
 }
 
-impl Drop for UI {
+impl<T: Float + ToString + FromStr> Drop for UI<'_, T> {
     fn drop(&mut self) {
         n::endwin();
     }
