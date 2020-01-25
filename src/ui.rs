@@ -27,6 +27,7 @@ const KEY_6: i32 = 54;
 const KEY_7: i32 = 55;
 const KEY_8: i32 = 56;
 const KEY_9: i32 = 57;
+const KEY_EQ: i32 = 61;
 const KEY_C: i32 = 99;
 const KEY_D: i32 = 100;
 const KEY_E: i32 = 101;
@@ -42,6 +43,7 @@ const KEY_ENTER: i32 = 10;
 const KEY_CARET: i32 = 94;
 
 const HELP: &str = "0-9 - digits
+= - toggle +/-
 r - 1/x
 s - square root
 ^ - power
@@ -115,6 +117,13 @@ impl<'a, T: Float + ToString + FromStr> UI<'a, T> {
                     self.current_number.push('.');
                 }
             }
+            KEY_EQ => {
+                if self.current_number.contains("-") {
+                    self.current_number.remove(0);
+                } else {
+                    self.current_number.insert(0, '-');
+                }
+            }
             _ => {
                 panic!("unmatched");
             }
@@ -126,7 +135,15 @@ impl<'a, T: Float + ToString + FromStr> UI<'a, T> {
 
     pub fn run(&mut self) {
         loop {
-            self.feed(n::getch());
+            let c = n::getch();
+            match c {
+                KEY_Q => {
+                    break;
+                }
+                _ => {
+                    self.feed(c);
+                }
+            }
         }
     }
 
@@ -139,14 +156,14 @@ impl<'a, T: Float + ToString + FromStr> UI<'a, T> {
     pub fn feed(&mut self, c: i32) {
         match c {
             KEY_Q => {
+                // TODO: does this belong here?
                 return;
             }
-            KEY_DOT => {
+            KEY_EQ | KEY_DOT | KEY_0..=KEY_9 => {
                 self.compose(c);
             }
-            KEY_0..=KEY_9 => {
-                self.compose(c);
-            }
+
+            // Operations
             KEY_C => {
                 self.calc.clear();
             }
@@ -188,8 +205,7 @@ impl<'a, T: Float + ToString + FromStr> UI<'a, T> {
 
         // Cleanup after an operation the stack
         match c {
-            KEY_DOT => {}
-            KEY_0..=KEY_9 => {}
+            KEY_EQ | KEY_DOT | KEY_0..=KEY_9 => {}
             _ => {
                 self.current_number.clear();
             }
@@ -220,6 +236,9 @@ mod tests {
         );
         assert_eq!(u.current_number, "9876.543201");
         assert_eq!(u.calc.peek(), 9876.543201);
+        u.feed(KEY_EQ);
+        assert_eq!(u.current_number, "-9876.543201");
+        assert_eq!(u.calc.peek(), -9876.543201);
         u.feed(KEY_ENTER);
         assert_eq!(u.current_number, "");
         assert_eq!(u.calc.peek(), 0.0);
